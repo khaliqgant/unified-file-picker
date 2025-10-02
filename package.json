@@ -1,0 +1,61 @@
+{
+  "name": "unified-file-picker",
+  "version": "1.0.0",
+  "description": "A React component for selecting files from multiple cloud storage providers (Google Drive, Dropbox, OneDrive, Box)",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "prepublishOnly": "npm run build",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "react",
+    "file-picker",
+    "google-drive",
+    "dropbox",
+    "onedrive",
+    "box",
+    "cloud-storage",
+    "typescript"
+  ],
+  "author": "Khaliq Gant <khaliqgant@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/khaliqgant/unified-file-picker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/khaliqgant/unified-file-picker/issues"
+  },
+  "homepage": "https://github.com/khaliqgant/unified-file-picker#readme",
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
+  },
+  "dependencies": {
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.288.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "rollup": "^3.0.0",
+    "rollup-plugin-dts": "^5.0.0",
+    "typescript": "^5.0.0"
+  }
+}
