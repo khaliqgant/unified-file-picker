@@ -4,21 +4,23 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 
-A React component library for selecting files from multiple cloud storage providers with a unified interface. Supports Google Drive (native picker), Dropbox, OneDrive, and Box.
+A React component library for selecting files from multiple cloud storage providers with a unified interface. Supports 8 major cloud providers with both native pickers and custom interfaces.
 
 ## ✨ Features
 
 - 🎨 **Beautiful UI** with smooth animations and modern design
-- 🔄 **Multiple Providers** - Google Drive (native picker), Dropbox, OneDrive, and Box
+- 🔄 **8 Cloud Providers** - Google Drive, Dropbox, OneDrive, Box, SharePoint, Confluence, Notion, Amazon S3
+- 🚀 **Two Operation Modes** - Backend-driven and Direct modal
 - 📱 **Responsive Design** - Works on desktop and mobile
 - ⚡ **Real-time Loading States** - Visual feedback during API calls
 - 🛡️ **Error Handling** - Graceful error messages and recovery
 - 📁 **File Preview** - See file details, size, and type
 - 🔗 **Direct Links** - Download and view files in browser
 - 🎯 **Unified Interface** - Single API with provider-specific options
-- 🚀 **Native Google Picker** - Uses Google's official file picker for Drive
+- 🚀 **Native Pickers** - Google Drive Picker, OneDrive File Picker v8
 - 📦 **TypeScript Support** - Full type safety and IntelliSense
 - 🎛️ **Customizable** - Provider-specific configuration options
+- 🔧 **Backend Integration** - BFF pattern for enterprise use
 
 ## 🚀 Quick Start
 
@@ -33,6 +35,50 @@ pnpm add unified-file-picker
 ```
 
 ### Basic Usage
+
+#### Backend-Driven Mode (Recommended for Production)
+
+```tsx
+import React, { useState } from 'react';
+import { UnifiedPicker, Document } from 'unified-file-picker';
+
+function App() {
+  const [docs, setDocs] = useState<Document[]>([]);
+
+  return (
+    <UnifiedPicker
+      mode="backend"
+      token="your-session-token"
+      onSelect={(docs) => setDocs(docs)}
+      multiple={true}
+      providers={["gdrive", "dropbox", "onedrive", "box", "sharepoint", "confluence", "notion", "s3"]}
+    />
+  );
+}
+```
+
+#### Direct Modal Mode (For Native Pickers)
+
+```tsx
+import React, { useState } from 'react';
+import { UnifiedPicker, Document } from 'unified-file-picker';
+
+function App() {
+  const [docs, setDocs] = useState<Document[]>([]);
+
+  return (
+    <UnifiedPicker
+      mode="modal"
+      provider="gdrive"
+      accessToken="your-google-oauth-token"
+      onSelect={(docs) => setDocs(docs)}
+      multiple={true}
+    />
+  );
+}
+```
+
+#### Legacy Component (Still Supported)
 
 ```tsx
 import React, { useState } from 'react';
@@ -59,20 +105,74 @@ function App() {
 
 ## 📖 Documentation
 
-### Props
+### Two Operation Modes
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `providers` | `Provider[]` | `["google", "dropbox", "onedrive", "box"]` | Which providers to show |
-| `tokens` | `Partial<Record<Provider, string>>` | - | Access tokens for each provider |
-| `googleAppId` | `string` | - | Google Cloud Project Number (required for Google Drive) |
-| `onPick` | `(result: UnifiedPickerResult) => void` | - | Callback when files are selected |
-| `onCancel` | `() => void` | - | Callback when picker is cancelled |
-| `className` | `string` | - | Additional CSS classes |
-| `googlePickerOptions` | `GooglePickerOptions` | - | Google Picker specific options |
-| `dropboxOptions` | `DropboxOptions` | - | Dropbox specific options |
-| `onedriveOptions` | `OneDriveOptions` | - | OneDrive specific options |
-| `boxOptions` | `BoxOptions` | - | Box specific options |
+#### 1. Backend-Driven Mode (Recommended for Production)
+
+The picker calls your backend with a session token. Your backend handles all provider authentication and API calls, normalizes responses to the Document model, and returns them.
+
+**Benefits:**
+- ✅ No CORS or tokens in the browser
+- ✅ Best for consistency and control  
+- ✅ Full customization of UI
+- ✅ Enterprise security compliance
+
+#### 2. Direct Modal Mode (For Native Pickers)
+
+For providers with an official picker UI (Google Drive Picker, OneDrive File Picker), the picker can accept an access token directly and open the vendor's modal.
+
+**Benefits:**
+- ✅ Fastest to integrate
+- ✅ Uses native provider UIs
+- ✅ Familiar user experience
+
+### UnifiedPicker Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `mode` | `"backend" \| "modal"` | ✅ | Operation mode |
+| `token` | `string` | ✅ (backend) | Session token for backend mode |
+| `provider` | `Provider` | ✅ (modal) | Provider for modal mode |
+| `accessToken` | `string` | ✅ (modal) | Access token for modal mode |
+| `onSelect` | `(docs: Document[]) => void` | ✅ | Callback when documents are selected |
+| `multiple` | `boolean` | - | Allow multiple selection (default: false) |
+| `providers` | `Provider[]` | - | Available providers for backend mode |
+
+### Supported Providers
+
+| Provider | Backend Mode | Modal Mode | Native Picker |
+|----------|-------------|------------|---------------|
+| Google Drive | ✅ | ✅ | ✅ Google Picker |
+| Dropbox | ✅ | ❌ | ❌ |
+| OneDrive | ✅ | ✅ | ✅ OneDrive File Picker v8 |
+| Box | ✅ | ❌ | ❌ |
+| SharePoint | ✅ | ❌ | ❌ |
+| Confluence | ✅ | ❌ | ❌ |
+| Notion | ✅ | ❌ | ❌ |
+| Amazon S3 | ✅ | ❌ | ❌ |
+
+### Document Model
+
+```typescript
+interface Document {
+  id: string;                 // `${provider}:${providerId}`
+  provider: Provider;
+  providerId: string;
+  kind: "file" | "folder" | "shortcut";
+  name: string;
+  mimeType?: string;
+  sizeBytes?: number;
+  modifiedAt?: string;
+  parentId?: string | null;
+  path?: string[];
+  webUrl?: string;
+  thumbnailUrl?: string;
+  downloadUrl?: string;
+  shortcutTargetId?: string;
+  owners?: { id?: string; email?: string; displayName?: string }[];
+  permissions?: ("reader"|"writer"|"owner")[];
+}
+```
 
 ### Provider-Specific Options
 
@@ -334,11 +434,28 @@ npm run build
 unified-file-picker/
 ├── src/                    # Source code
 │   ├── types/             # TypeScript definitions
+│   │   ├── index.ts       # Legacy types
+│   │   └── document.ts    # Document model
 │   ├── providers/         # Provider implementations
+│   │   ├── google-picker.ts    # Google Picker API
+│   │   ├── onedrive-picker.ts  # OneDrive File Picker v8
+│   │   ├── dropbox.ts          # Dropbox REST API
+│   │   ├── box.ts              # Box REST API
+│   │   ├── sharepoint.ts       # SharePoint REST API
+│   │   ├── confluence.ts        # Confluence REST API
+│   │   ├── notion.ts            # Notion REST API
+│   │   └── index.ts              # Provider exports
 │   ├── ui/                # UI components
+│   │   └── button.tsx     # Button component
+│   ├── UnifiedFilePicker.tsx  # Legacy component
+│   ├── UnifiedPicker.tsx      # New unified component
 │   └── index.ts           # Main exports
 ├── examples/              # Usage examples
 ├── demo/                  # Next.js demo application
+│   ├── pages/             # Demo pages
+│   ├── backend/           # Backend implementation
+│   ├── src/               # Local demo components
+│   └── .env.local         # Demo environment variables
 ├── dist/                  # Built package (generated)
 └── package.json           # NPM package configuration
 ```
@@ -361,7 +478,7 @@ npm run clean
 
 ### Demo Application
 
-The demo showcases all 7 cloud providers with both native pickers and custom interfaces.
+The demo showcases all 8 cloud providers with both operation modes and native pickers.
 
 #### Quick Start (Demo Mode)
 
@@ -372,6 +489,12 @@ npm run dev
 ```
 
 This will start the demo with mock data - no API tokens required! Perfect for exploring the interface.
+
+**Demo Features:**
+- 🏠 **Homepage** - Overview and feature showcase
+- 🧪 **Demo Page** - Interactive testing of both modes
+- 🔧 **Backend Integration** - Full BFF implementation
+- 📱 **Responsive Design** - Works on all devices
 
 #### Full Setup (Real API Integration)
 
@@ -413,13 +536,76 @@ To test with real cloud providers:
    NEXT_PUBLIC_NOTION_TOKEN=secret_your_actual_notion_token
    ```
 
-3. **Start the demo:**
+3. **Start the backend:**
    ```bash
+   cd demo/backend
+   npm install
+   npm start
+   ```
+
+4. **Start the demo:**
+   ```bash
+   cd demo
    npm run dev
    ```
 
-4. **Open your browser:**
+5. **Open your browser:**
    Visit [http://localhost:3000](http://localhost:3000) (or the next available port)
+
+#### Backend API Endpoints
+
+The demo includes a full backend implementation with these endpoints:
+
+- `GET /api/storage/providers` - List available providers
+- `GET /api/storage/list?provider={id}` - List files from provider
+- `GET /api/storage/search?provider={id}&query={q}` - Search files
+- `GET /api/storage/node/{id}` - Get specific file/folder
+- `POST /api/storage/presign-download` - Get download URLs
+
+#### Backend API Specification
+
+For production use, implement these endpoints in your backend:
+
+```typescript
+// GET /api/storage/providers
+interface ProvidersResponse {
+  providers: Array<{
+    id: string;
+    name: string;
+    icon: string;
+  }>;
+}
+
+// GET /api/storage/list?provider={id}&folderId={id}
+interface ListResponse {
+  documents: Document[];
+}
+
+// GET /api/storage/search?provider={id}&query={q}
+interface SearchResponse {
+  documents: Document[];
+}
+
+// GET /api/storage/node/{id}
+interface NodeResponse {
+  document: Document;
+}
+
+// POST /api/storage/presign-download
+interface PresignRequest {
+  documentId: string;
+  expiresIn?: number; // seconds, default 3600
+}
+interface PresignResponse {
+  downloadUrl: string;
+  expiresAt: string;
+}
+```
+
+**Authentication:**
+- All requests require `Authorization: Bearer {session-token}` header
+- Your backend validates the session token and maps it to provider tokens
+- Provider tokens should never be exposed to the frontend
 
 #### Getting API Tokens
 

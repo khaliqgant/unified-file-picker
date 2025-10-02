@@ -1,7 +1,7 @@
 {
   "name": "unified-file-picker",
   "version": "1.0.0",
-  "description": "A React component for selecting files from multiple cloud storage providers (Google Drive, Dropbox, OneDrive, Box)",
+  "description": "A React component for selecting files from multiple cloud storage providers (Google Drive, Dropbox, OneDrive, Box and more!)",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
